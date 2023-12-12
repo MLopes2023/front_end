@@ -7,3 +7,7 @@ Pode ser entendido como participante da lista restritiva, estar por exemplo incl
 Como Executar
 
 Para executar basta abrir a página index.html do repositório front_end, porém, a api deve estar já ativa na porta  http://localhost:5000.
+
+
+Link para o Video
+https://drive.google.com/drive/folders/1iZaUg7RLNIVMRuDUAJEBl45LLOkdWQCk
