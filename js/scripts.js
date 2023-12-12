@@ -66,6 +66,15 @@ function ElementValueTextIsNull(valuetext){
   return existe;
 }
 
+function showLoading() {
+  document.getElementById('loading').style.display = 'flex';
+}
+
+// Função para ocultar o loading
+function hideLoading() {
+  document.getElementById('loading').style.display = 'none';
+}
+
 //#endregion
 
 //#region "02-Validação / formato documento CPF/CNPJ"
@@ -348,7 +357,6 @@ const getPopulaComboboxClassificacao = async () => {
 
 //#region "04-Cadastro de Participantes"
 
-
 /*
 ------------------------------------------------------------------------------------------
   Funções do participante da lista restritiva
@@ -447,17 +455,26 @@ const addNewRowDataTableParticipante = (id_participante, nome_participante, id_c
 /* Método de chamada api para buscar participantes da lista restritiva cadastrados cadastrados na base de dados */
 const postPopulaDataTableParticipante = async () => {
 
+  // Ativa gif loading
+  showLoading();
+
   try{
-          
+        
       //define form data de chamada da api
       let formData = new FormData();
       let inputCmbDocumentotext = ""
       let inputTxtNumeroDocumentotext = ""
      
-      if (!ElementValueTextIsNull(document.getElementById("inputCmbDocumento").text)){
-        inputCmbDocumentotext = document.getElementById("inputCmbDocumento").text;
+      //set combo documento da solicitação
+      sel = document.getElementById("inputCmbDocumento")
+      if(sel.selectedIndex >= 0){
+        if (!ElementValueTextIsNull(sel.options[sel.selectedIndex].text)){
+          inputCmbDocumentotext = sel.options[sel.selectedIndex].text;
+        }
+      }else{
+        inputCmbDocumentotext = "";
       }
-           
+
       if (!ElementValueTextIsNull(document.getElementById("inputTxtNumeroDocumento").value)){
         inputTxtNumeroDocumentotext = document.getElementById("inputTxtNumeroDocumento").value;
       }
@@ -479,14 +496,13 @@ const postPopulaDataTableParticipante = async () => {
             var table = new DataTable('#dataTableParticipante');
             table.clear().draw(false); 
             // Adicionar linhas a tabela 
-            if( Object.keys(data['participantes']).length === 0 ){
-                //alert("Não existem informações para listar!")
-            }else{
-              data.participantes.forEach(item => addNewRowDataTableParticipante(item.id_participante,        item.nome_participante, 
-                                                                              item.id_class_participante,  item.id_pais_doc_participante, 
-                                                                              item.id_doc_participante,    item.num_doc_participante, 
-                                                                              item.pais_documento,         item.documento, 
-                                                                              item.classificacao));
+            if( Object.keys(data['participantes']).length > 0 ){
+                data.participantes.forEach(item => addNewRowDataTableParticipante(item.id_participante,        item.nome_participante, 
+                                                                                  item.id_class_participante,  item.id_pais_doc_participante, 
+                                                                                  item.id_doc_participante,    item.num_doc_participante, 
+                                                                                  item.pais_documento,         item.documento, 
+                                                                                  item.classificacao));
+
             }
           });
         }
@@ -500,10 +516,15 @@ const postPopulaDataTableParticipante = async () => {
       .catch((error) => {
         console.error('Error:', error);
       });
+
   }
   catch(erro){
       console.error("Error:", erro);
   }
+
+  // Desativa gif loading
+  hideLoading();
+
 }
 
 /* declara variável com o indice do participante para uso na edição e remoção do registro */
@@ -825,8 +846,11 @@ function validaDatasFormulario(){
 
 /* Método de chamada api para buscar as pesquisas de um período de datas ou pelos demais filtros opcionais na base de dados */
 const postPopulaDataTablePesquisa = async ( ) => {
-
-  if(validaDatasFormulario()){
+   
+  // Ativa gif loading
+   showLoading();
+  
+   if(validaDatasFormulario()){
     try{
         //define form data de chamada api
         let formData = new FormData();
@@ -854,7 +878,7 @@ const postPopulaDataTablePesquisa = async ( ) => {
 
         //set form data
         formData.append("data_pesquisa_inicial", inputTxtDataInicio_p_value);
-        formData.append("data_pesquisa_final", inputTxtDataInicio_p_value);
+        formData.append("data_pesquisa_final", inputTxtDataFim_p_value);
         formData.append("documento_participante", inputCmbDocumentotext);
         formData.append("num_doc_participante",   retiraFormatacaoDocumentoStr(inputTxtNumeroDocumentotext));
 
@@ -868,16 +892,13 @@ const postPopulaDataTablePesquisa = async ( ) => {
           console.log(response)
           if (response.status === 200) {
               response.json().then(data => {
-              console.log(data.status_listas)
+              console.log(data.pesquisas)
               // Limpar linhas da tabela 
               const table = new DataTable('#dataTablePesquisa');
               table.clear().draw(false); 
-              if( Object.keys(data['status_listas']).length === 0 ){
-                //alert("Não existem informações para listar!")
-              }
-              else{
-                // Adicionar linhas a tabela 
-                data.status_listas.forEach(item => addNewRowDataTablePesquisa(  item.data_pesquisa_fmt_br,  item.nome_participante, 
+              // Adicionar linhas a tabela 
+              if( Object.keys(data['pesquisas']).length > 0 ){
+                data.pesquisas.forEach(item => addNewRowDataTablePesquisa(  item.data_pesquisa_fmt_br,  item.nome_participante, 
                                                                                 item.pais_documento,        item.documento, 
                                                                                 item.num_doc_participante,  item.ident_lista, 
                                                                                 item.descricao_status,      item.observacao_pesquisa ));
@@ -898,6 +919,9 @@ const postPopulaDataTablePesquisa = async ( ) => {
     catch(erro){
         console.error("Error:", erro);
     }
+    // Desativa gif loading
+    hideLoading();
+  
 
   }
 }
@@ -941,4 +965,3 @@ if (paginaAtiva == false){
 }
 
 //#endregion
-
