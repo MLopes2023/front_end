@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="pt">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <!-- css bootstrap e datatables  -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/css/bootstrap.css"/>
+        <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css"/>
+        <link rel="stylesheet" href="styles/styles.css">
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <!-- Título da aplicação  -->
+        <title>Monitoramento de Participantes da Lista Restitiva</title>
+    </head>
+    <body>
+
+    <div class="container-fluid">
+        
+        <nav class="navbar fixed-top navbar-expand-lg navbar-light bg-light">
+            <div class="container-fluid col-sm-4">
+              <a class="navbar-brand" href="#">
+                <img src="imagem/logo.png" alt="" width="30" height="24" class="d-inline-block align-text-top">
+                Monitoramento
+              </a>
+            </div>
+            <!-- <a class="navbar-brand" href="#">Monitoramento</a> -->
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+              <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarText">
+                <ul class="navbar-nav mr-auto">
+                    <div class="list-group  text-center" id="myList" role="tablist">
+                        <a class="list-group-item list-group-item-action active" data-toggle="list" href="#participante" role="tab">Participantes da lista Restritiva</a>
+                        <a class="list-group-item list-group-item-action" data-toggle="list" href="#pesquisa" role="tab">Simulação da Pesquisa da Lista Restritiva</a>
+                    </div>
+                </ul>
+            </div>
+        </nav>
+        
+        <!---------------------------------------------------------------------------------------------------------------------- -->
+        <!-- Tab panes -->
+        <!---------------------------------------------------------------------------------------------------------------------- -->
+
+        <div class="tab-content" style="padding-top: 100px;">
+            
+            <!------------------------------------------------------------------------------------------------------------------ -->
+            <!--Participantes-->
+            <!------------------------------------------------------------------------------------------------------------------ -->
+
+            <div class="tab-pane active" id="participante" role="tabpanel">
+                <div class="row  justify-content-md-center">
+                    <div class="col-sm-10" > 
+
+                        <div class="formParticipante">
+
+                          <div class="form-row">
+
+                            <div class="form-group col-sm-2">
+                              <label for="inputCmbDocumento">Documento</label>
+                              <select id="inputCmbDocumento" class="form-control"></select>
+                            </div>
+
+                            <div class="form-group col-sm-2">
+                              <label for="inputTxtNumeroDocumento">N° Documento</label>
+                              <input type="text" class="form-control" id="inputTxtNumeroDocumento" onfocus="retirarFormatacaoDocumento(this)"  
+                                                                      onblur="formatarCampoDocumento(this)" onchange="validaDocumentoParticipante()">
+                            </div>
+
+                            <div class="form-group col-sm-3 pt-4-u">
+                              <button type="submit" id="btnAtualizarGrid" onclick="postPopulaDataTableParticipante()" class="btn btn-sm btn-primary form-control">Atualizar Grid</button>
+                            </div>
+
+
+                            <div class="form-group col-sm-3 pt-4-u">
+                              <button  type="button" class="btn btn-sm btn-primary form-control" onclick="OpenFormAdicionaParticipante()">Novo Participante</button>
+                            </div>
+
+                          </div>
+                          
+                          <!-- <div class="form-row">
+                              <div class="form-group col-sm-2 pt-4-u">
+                                <button type="submit" id="btnAtualizarGrid" onclick="postPopulaDataTableParticipante()" class="btn btn-sm btn-primary col-sm-11">Atualizar Grid</button>
+                              </div>
+                              <div class="form-group col-sm-2 pt-4-u">
+                                <button  type="button" class="btn btn-sm btn-primary" onclick="OpenFormAdicionaParticipante()">Novo Participante</button>
+                              </div>
+                          </div> -->
+                          
+                          
+                          <div class="col-sm-12">
+                            <table id="dataTableParticipante" class="display ">
+                              <thead>
+                                <tr>
+                                  <th>Nome do participante</th>
+                                  <th>País do documento</th>
+                                  <th>Documento</th>
+                                  <th>Nº do documento</th>
+                                  <th>Classificação</th>
+                                  <th> id_participante</th>
+                                  <th>id_class_participante</th>
+                                  <th>id_pais_doc_participante</th>
+                                  <th>id_doc_participante</th>  
+                                </tr>
+                              </thead>
+                            </table>
+                          </div>
+
+                        </div>
+
+                    </div>
+                    
+                </div>
+            </div>
+
+            <!------------------------------------------------------------------------------------------------------------------ -->  
+            <!-- Inicial Modal Participante -->
+            <!------------------------------------------------------------------------------------------------------------------ -->
+
+            <div class="modal fade" id="formParticipanteReg" tabindex="-1" aria-labelledby="formParticipanteRegLabel" aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="formParticipanteRegLabel">Participante da Lista Restritiva</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                  <div class="modal-body">
+                    <div class="form-col">
+
+                      <div class="form-group col-sm-12">
+                        <label for="inputcmbClasificacaoReg">Classificação</label>
+                        <select id="inputcmbClasificacaoReg" class="form-control"></select>
+                      </div>
+
+                      <div class="form-group col-sm-12">
+                        <label for="inputTxtParticipanteReg">Nome do Participante</label>
+                        <input type="text" class="form-control" id="inputTxtParticipanteReg">
+                      </div>
+
+                      <div class="form-group col-sm-12">
+                        <label for="inputCmbPaisDocumentoReg">País do Documento</label>
+                        <select id="inputCmbPaisDocumentoReg" class="form-control"></select>
+                      </div>
+
+                      <div class="form-group col-sm-6">
+                        <label for="inputCmbDocumentoReg">Documento</label>
+                        <select id="inputCmbDocumentoReg" class="form-control"></select>
+                      </div>
+
+                      <div class="form-group col-sm-6">
+                        <label for="inputTxtNumeroDocumentoReg">N° Documento</label>
+                        <input type="text" class="form-control" id="inputTxtNumeroDocumentoReg" onfocus="retirarFormatacaoDocumento(this)"  
+                                                                onblur="formatarCampoDocumento(this)" onchange="validaDocumentoParticipanteReg()">
+                      </div>
+
+                    </div>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="btnAdicionarParticipante" onclick="AdicionarParticipante()">Adicionar Registro</button>
+                    <button type="button" class="btn btn-primary" id="btnEditarParticipante" onclick="EditarParticipante()">Editar Registro</button>
+                    <button type="button" class="btn btn-primary" id="btnRemoverParticipante" onclick="RemoverParticipante()">Remover Registro</button>
+                    <button type="button" class="btn btn-secondary" id="btnCloseModal" data-dismiss="modal">Close</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!---------------------------------------------------------------------------------------------------------------------- -->
+            <!-- Fim Modal Participante -->
+            <!---------------------------------------------------------------------------------------------------------------------- -->
+
+            <!---------------------------------------------------------------------------------------------------------------------- -->
+            <!-- Inicia Formulário Pesquisa Lista Restritiva
+            <!---------------------------------------------------------------------------------------------------------------------- -->
+
+            <div class="tab-pane" id="pesquisa" role="tabpanel">
+                <div class="row  justify-content-md-center">
+                    <div class="col-sm-10" > 
+
+                        <div class="formPesquisa">
+
+                          <div class="form-row">
+                            
+                            <div class="form-group col-sm-2">
+                              <label for="inputTxtDataInicio_p">Data Inicial</label>
+                              <input type="date" class="form-control" id="inputTxtDataInicio_p" required  >
+                              <span id="erroCampoRequeridoDataIni" class="error"></span> 
+                            </div>
+                            
+                            <div class="form-group col-sm-2">
+                              <label for="inputTxtDataFim_p">Data Final</label>
+                              <input type="date" class="form-control" id="inputTxtDataFim_p" required >
+                              <span id="erroCampoRequeridoDataFinal" class="error"></span>
+                            </div>
+
+                            <div class="form-group col-sm-2">
+                              <label for="inputCmbDocumento_p">Documento</label>
+                              <select id="inputCmbDocumento_p" class="form-control"></select>
+                            </div>
+
+                            <div class="form-group col-sm-2">
+                              <label for="inputTxtNumeroDocumento_p">N° Documento</label>
+                              <input type="text" class="form-control" id="inputTxtNumeroDocumento_p" onfocus="retirarFormatacaoDocumento(this)"  
+                                                                      onblur="formatarCampoDocumento(this)" onchange="validaDocumentoPesquisa()">
+                            </div>
+
+                            <div class="form-group col-sm-2 pt-4-u">
+                              <button type="submit" id="btnAtualizarGrid" onclick="postPopulaDataTablePesquisa()" class="btn btn-sm btn-primary col-sm-11 form-control">Atualizar Grid</button>
+                            </div>
+
+                          </div>
+                          
+                          <div class="col-sm-12">
+                            <table id="dataTablePesquisa" class="display ">
+                              <thead>
+                                <tr>
+                                  <th>Data</th>
+                                  <th>Nome do participante</th>
+                                  <th>País do documento</th>
+                                  <th>Documento</th>
+                                  <th>Nº do documento</th>
+                                  <th>Identificador</th>          
+                                  <th>Situação</th>          
+                                  <th>Observação</th>          
+                                </tr>
+                              </thead>
+                            </table>
+                          </div>
+
+                        </div>
+
+                    </div>
+                    
+                </div>
+            </div>
+
+            
+        </div>
+
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.7.0.js"></script>
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap4.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js" integrity="sha384-+sLIOodYLS7CIrQpBjl+C7nPvqq+FbNUBDunl/OZv93DB7Ln/533i8e/mZXLi/P+" crossorigin="anonymous"></script>
+    <script src="js/datatable-participante-config.js"></script>
+    <script src="js/datatable-pesquisa-config.js"></script>
+
+    <script>
+        //paginação
+        $('#myLista').on('click', function (event) {
+            event.preventDefault()
+            $(this).tab('show')
+          })
+
+
+    </script>
+
+    <script src="js/scripts.js"></script>
+
+    </body>
+</html>
+
+
+

@@ -1,0 +1,31 @@
+.list-group {
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-direction: row !important;
+    flex-direction: row  !important;
+    width: 700px  !important;
+}
+
+
+.list-group-item {
+
+    padding: 0.4rem 1.25rem !important;
+}
+
+.navbar {
+    padding: 0.1rem 1rem !important;
+    background-color: #e3f2fd !important;
+}
+
+.list-group-item {
+    width: 400px !important;
+}
+
+.pt-4-u, .py-4-u {
+    padding-top: 2rem !important;
+}
+
+
+.error {
+  color: red;
+}
