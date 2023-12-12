@@ -480,7 +480,7 @@ const postPopulaDataTableParticipante = async () => {
             table.clear().draw(false); 
             // Adicionar linhas a tabela 
             if( Object.keys(data['participantes']).length === 0 ){
-                alert("Não existem informações para listar!")
+                //alert("Não existem informações para listar!")
             }else{
               data.participantes.forEach(item => addNewRowDataTableParticipante(item.id_participante,        item.nome_participante, 
                                                                               item.id_class_participante,  item.id_pais_doc_participante, 
@@ -873,7 +873,7 @@ const postPopulaDataTablePesquisa = async ( ) => {
               const table = new DataTable('#dataTablePesquisa');
               table.clear().draw(false); 
               if( Object.keys(data['status_listas']).length === 0 ){
-                alert("Não existem informações para listar!")
+                //alert("Não existem informações para listar!")
               }
               else{
                 // Adicionar linhas a tabela 
