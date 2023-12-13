@@ -138,7 +138,7 @@
                     </button>
                   </div>
                   <div class="modal-body">
-                    <div class="form-col">
+                    <div class="form-row">
 
                       <div class="form-group col-sm-12">
                         <label for="inputcmbClasificacaoReg">Classificação</label>
@@ -183,7 +183,7 @@
             <!---------------------------------------------------------------------------------------------------------------------- -->
 
             <!---------------------------------------------------------------------------------------------------------------------- -->
-            <!-- Inicia Formulário Pesquisa Lista Restritiva
+            <!-- Inicia Formulário Simulação Pesquisa Lista Restritiva
             <!---------------------------------------------------------------------------------------------------------------------- -->
 
             <div class="tab-pane" id="pesquisa" role="tabpanel">
@@ -223,10 +223,9 @@
                                 </div>
     
                                 <div class="form-group col-sm-4 pt-4-u bnt-pd">
-                                  <button type="submit" id="btnAddSimulacao"  class="btn btn-sm btn-primary form-control">Simular Pesquisa</button>
+                                  <button type="submit" id="btnAddSimulacao"  class="btn btn-sm btn-primary form-control"  onclick="OpenFormAdicionaPesquisa()">Simular Pesquisa</button>
                                 </div>
                             </div>
-                            
 
                           </div>
 
@@ -255,6 +254,73 @@
                     
                 </div>
             </div>
+
+            <!------------------------------------------------------------------------------------------------------------------ -->  
+            <!-- Inicial Modal Simulação Pesquisa Lista Restritiva -->
+            <!------------------------------------------------------------------------------------------------------------------ -->
+
+            <div class="modal fade" id="formPesquisaReg" tabindex="-1" aria-labelledby="formPesquisaRegLabel" aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="formpesquisaRegLabel">Simulação Pesquisa da Lista Restritiva</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                  <div class="modal-body">
+                    <div class="form-row">
+                      
+                      <div class="form-group col-sm-6">
+                        <label for="inputTxtDataPesquisaReg">Data da Pesquisa</label>
+                        <input type="date" class="form-control" id="inputTxtDataPesquisaReg" required  >
+                      </div>
+
+                      <div class="form-group col-sm-12">
+                        <label for="inputcmbIdentPesquisaReg">Identificador da Lista Restritiva</label>
+                        <select id="inputcmbIdentPesquisaReg" class="form-control" onchange="PopulaCmbStatusIdentificadoresPesquisaReg()"></select>
+                      </div>
+
+                      <div class="form-group col-sm-12">
+                        <label for="inputcmbStatusPesquisaReg">Status do Identificador</label>
+                        <select id="inputcmbStatusPesquisaReg" class="form-control"></select>
+                      </div>
+
+                      <div class="form-group col-sm-6">
+                        <label for="inputCmbDocumentoPesquisaReg">Documento do Participante</label>
+                        <select id="inputCmbDocumentoPesquisaReg" class="form-control"></select>
+                      </div>
+
+                      <div class="form-group col-sm-6">
+                        <label for="inputTxtNumDocPesquisaReg">N° Documento</label>
+                        <input type="text" class="form-control" id="inputTxtNumDocPesquisaReg" onfocus="retirarFormatacaoDocumento(this)"  
+                                                                onblur="formatarCampoDocumento(this)" onchange="validaDocumentoPesquisaReg()">
+                      </div>
+
+                      <div class="form-group col-sm-12">
+                        <label for="inputCmbParticipantePesquisaReg">Nome do Participante</label>
+                        <select id="inputCmbParticipantePesquisaReg" class="form-control" onchange="setValueInputTxtNumDocPesquisaReg()"></select>
+                      </div>
+
+                      <div class="form-group col-sm-12">
+                        <label for="inputTxtObservacaoPesquisaReg">Observação</label>
+                        <input type="text" class="form-control" id="inputTxtObservacaoPesquisaReg" >
+                      </div>
+
+
+                    </div>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="btnAdicionarPesquisa" onclick="AdicionarPesquisa()">Adicionar Simulação</button>
+                    <button type="button" class="btn btn-secondary" id="btnCloseModalPesquisa" data-dismiss="modal">Close</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!---------------------------------------------------------------------------------------------------------------------- -->
+            <!-- Fim Modal Simulação Pesquisa Lista Restritiva -->
+            <!---------------------------------------------------------------------------------------------------------------------- -->
 
             
         </div>

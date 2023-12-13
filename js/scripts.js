@@ -6,15 +6,17 @@
    Inicializa variáveis 
  ---------------------------------------------------------------------------------
 */
-var paginaAtiva                 = false;
+var paginaativa                 = false;
 var inputidpaisdocumentovalue	  = 0;
 var inputnomepaisdocumentotext  = "";
 var inputiddocumentovalue       = 0;
 var inputdocumentotext          = "";
 var inputidparticipantevalue	  = 0;
 var inputnomeparticipantetext   = "";
-var inputidclassificacaovalue	  = 0
-var inputdescrclassificacaotext = ""
+var inputidclassificacaovalue	  = 0;
+var inputdescrclassificacaotext = "";
+var listaparticipantes;
+var listastatusidentificadores ;
 
 /*
  ---------------------------------------------------------------------------------
@@ -223,7 +225,7 @@ function retiraFormatacaoDocumentoStr(strdoc){
 
 /*
 ------------------------------------------------------------------------------------------
-  Funções para popular comoboboxes documento e participante
+  Funções para popular comoboboxes
 ------------------------------------------------------------------------------------------
 */
 
@@ -277,24 +279,34 @@ const getPopulaComboboxPaisDocumento = async () => {
 
 /* Método de adição de uma linha na combo box documento */
 const addRowComboBoxDocumento = (id_documento, documento) => {
- 
+  
+  //documento do formulário participantes
   let combo     = document.getElementById("inputCmbDocumento");
   let option    = document.createElement("option");
   option.text   = documento;
   option.value  = id_documento;
   combo.add(option);
 
+  //documento do modal formulário participantes
   let comboReg     = document.getElementById("inputCmbDocumentoReg");
   let optionReg    = document.createElement("option");
   optionReg.text   = documento;
   optionReg.value  = id_documento;
   comboReg.add(optionReg);
   
+  //documento do formulário simulação pesquisa
   let comboPesquisa   = document.getElementById("inputCmbDocumento_p");
   let optionPesquisa  = document.createElement("option");
   optionPesquisa.text  = documento;
   optionPesquisa.value = id_documento;
   comboPesquisa.add(optionPesquisa);
+
+  //documento do formulário modal simulação pesquisa
+  let comboPesquisaReg   = document.getElementById("inputCmbDocumentoPesquisaReg");
+  let optionPesquisaReg  = document.createElement("option");
+  optionPesquisaReg.text  = documento;
+  optionPesquisaReg.value = id_documento;
+  comboPesquisaReg.add(optionPesquisaReg);
   
 }
 
@@ -353,6 +365,185 @@ const getPopulaComboboxClassificacao = async () => {
   }
 }
 
+/* Método de adição de uma linha na combo box classificação */
+const addRowComboBoxIndentificadores = (ident_lista, descricao_lista) => {
+ 
+  let comboReg     = document.getElementById("inputcmbIdentPesquisaReg");
+  let optionReg    = document.createElement("option");
+  optionReg.text   = descricao_lista;
+  optionReg.value  = ident_lista;
+  comboReg.add(optionReg);
+}
+
+/* Método de adição de uma linha na combo box classificação */
+const addRowComboBoxStatusIndentificadores = (id_status_lista, descricao_status) => {
+ 
+  let comboReg     = document.getElementById("inputcmbStatusPesquisaReg");
+  let optionReg    = document.createElement("option");
+  optionReg.text   = descricao_status;
+  optionReg.value  = id_status_lista;
+  comboReg.add(optionReg);
+}
+
+/* Método de adição de uma linha na combo box participantes  */
+const addRowComboBoxParticipantes = (id_participante, nome_participante) => {
+ 
+  let comboReg     = document.getElementById("inputCmbParticipantePesquisaReg");
+  let optionReg    = document.createElement("option");
+  optionReg.text   = nome_participante;
+  optionReg.value  = id_participante;
+  comboReg.add(optionReg);
+}
+
+/* Método de chamada api para buscar identificadores da lista restritiva cadastrados na base de dados */
+const getPopulaComboboxIndentificadores = async () => {
+
+  try{
+          
+    let consultalista = await fetch(url_api + "/ListarIdentificadoresListaRestritiva"); 
+    let datajson      = await consultalista.json();
+    
+    addRowComboBoxIndentificadores (0, "") /* Adiciona primeira linha da combo boxe */
+
+    if (datajson.mesage){
+        alert(datajson.mesage);
+      }  
+    else{
+        datajson.listas_restritivas.forEach(item => addRowComboBoxIndentificadores(item.ident_lista, item.descricao_lista));
+    }  
+  }
+  catch(erro){
+      console.error("Error:", erro);
+  }
+}
+
+/* Método de chamada api para buscar participantes cadastrados na base de dados */
+const DeleteRowstCmbParticipantePesquisaReg = () => {
+  let elemento = document.getElementById("inputCmbParticipantePesquisaReg");
+  elemento.options.length = 0;
+}
+
+const postPopulaListaParticipantes = async ( ) => {
+     
+try{
+    //define form data de chamada api
+    let formData = new FormData();
+    formData.append("documento_participante", "");
+    formData.append("num_doc_participante", "");
+
+    // Efetua solicitação api
+    fetch(url_api + "/ListarParticipantes", {
+    
+      method: "post",
+      body: formData
+    })
+    .then((response) => {
+      console.log(response)
+      if (response.status === 200) {
+          response.json().then(data => {
+          console.log(data.pesquisas)
+          // recuper objeto lista e popula comboboxe participantes
+          if( Object.keys(data['participantes']).length > 0 ){
+            // recupera lista
+            listaparticipantes = data.participantes
+            // limpa comboboxe
+            DeleteRowstCmbParticipantePesquisaReg();
+            // adiciona primeira linha da combo boxe 
+            addRowComboBoxParticipantes (0, "") 
+            // popula comboboxe
+            listaparticipantes.forEach(item => addRowComboBoxParticipantes(item.id_participante, item.nome_participante));
+          }
+        });
+      }
+      else if (!response.ok) {
+        return response.json().then(errorData => {
+        console.log(errorData)
+        alert(errorData.mesage);
+        });
+      }
+    })
+    .catch((error) => {
+      console.error('Error:', error);
+    });
+  }
+  catch(erro){
+  console.error("Error:", erro);
+  }
+}
+
+/* Método de chamada api para buscar status dos identificadores da lista restritiva cadastrados na base de dados */
+const postPopulaListaStatusIdentificadores = async ( ) => {
+     
+  try{
+      //define form data de chamada api
+      let formData = new FormData();
+      formData.append("ident_lista_status", "");
+  
+      // Efetua solicitação api
+      fetch(url_api + "/ListarStatusIdentificadoresListaRestritiva", {
+      
+        method: "post",
+        body: formData
+      })
+      .then((response) => {
+        console.log(response)
+        if (response.status === 200) {
+            response.json().then(data => {
+            console.log(data.pesquisas)
+            // recuper objeto com a lista 
+            if( Object.keys(data['status_listas']).length > 0 ){
+              listastatusidentificadores = data.status_listas
+            }
+          });
+        }
+        else if (!response.ok) {
+          return response.json().then(errorData => {
+          console.log(errorData)
+          alert(errorData.mesage);
+          });
+        }
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+      });
+    }
+    catch(erro){
+    console.error("Error:", erro);
+    }
+  }
+  
+/* Métodos para popula comboboxe status dos identificadores da lista restritiva cadastrados na base de dados */
+const DeleteRowsCmbStatusIdentificadoresPesquisaReg = () => {
+  let elemento = document.getElementById("inputcmbStatusPesquisaReg");
+  elemento.options.length = 0;
+}
+
+const PopulaCmbStatusIdentificadoresPesquisaReg = () => {
+  try{
+
+     // limpa comboboxe
+     DeleteRowsCmbStatusIdentificadoresPesquisaReg();
+     // adiciona primeira linha da combo boxe 
+     addRowComboBoxStatusIndentificadores (0, "") 
+     
+    // recupera valor chave do elemento comboboxe identificadores para filtrar status 
+    let sel = document.getElementById("inputcmbIdentPesquisaReg");
+    let id_value = "";
+    if(sel.selectedIndex >= 0){
+      if (!ElementValueTextIsNull(sel.options[sel.selectedIndex].value)){
+        // recupera valor chave do filtro
+        let id_value = sel.options[sel.selectedIndex].value;
+        // recupera status na lista conforme campo chave ( identificador )
+        let arrayfiltrado = listastatusidentificadores.filter(item => item.ident_lista_status === id_value )
+        //popula comboboxe
+        arrayfiltrado = arrayfiltrado.filter(item => addRowComboBoxStatusIndentificadores(item.id_status_lista, item.descricao_status) )
+      }
+    }
+  }
+  catch(erro){
+    console.error("Error:", erro);
+    }
+}
 //#endregion
 
 //#region "04-Cadastro de Participantes"
@@ -776,6 +967,8 @@ const RemoverParticipante = () => {
 
 //#region "05-Simulação Pesquisa Lista Restritiva"
 
+// variaveis 
+var id_pais_doc_participante_pesquisa = 0;
 
 /* Recupera tabela pesquisa */
 $(document).ready(function() {
@@ -785,13 +978,66 @@ $(document).ready(function() {
 
 });
 
-/* Valida documento do participante do formulario pesquisa*/
+/* Valida documento do participante do formulario simulação pesquisa*/
 function validaDocumentoPesquisa(){
   let msginvalida = validaCpfCnpj(document.getElementById("inputTxtNumeroDocumento_p").value);
   if (msginvalida != "" ){
     alert(msginvalida);
     document.getElementById("inputTxtNumeroDocumento_p").value = "";
     document.getElementById("inputTxtNumeroDocumento_p").focus();
+  }
+}
+
+/* Valida documento do participante do formulario modal de simulação pesquisa*/
+function validaDocumentoPesquisaReg(){
+  let msginvalida = validaCpfCnpj(document.getElementById("inputTxtNumDocPesquisaReg").value);
+  if (msginvalida != "" ){
+    alert(msginvalida);
+    document.getElementById("validaDocumentoPesquisaReg").value = "";
+    document.getElementById("validaDocumentoPesquisaReg").focus();
+  }
+  setValueInputCmbParticipantePesquisaReg();
+}
+
+function setValueInputCmbParticipantePesquisaReg(){
+
+  let elemento_nome   = document.getElementById("inputCmbParticipantePesquisaReg")
+  let elemento_tpdoc  = document.getElementById("inputCmbDocumentoPesquisaReg")
+  elemento_nome.value = "";
+  elemento_tpdoc.value = "";
+  let id_value = document.getElementById("inputTxtNumDocPesquisaReg").value;
+
+  if (!ElementValueTextIsNull(id_value) && id_value != "")
+  {
+    // retira formato do campo
+    id_value = retiraFormatacaoDocumentoStr(id_value)
+    // recupera documento na lista
+    let arrayfiltrado = listaparticipantes.filter(item => item.num_doc_participante === id_value)
+    arrayfiltrado.forEach( item => {
+      elemento_nome.value = item.id_participante 
+      elemento_tpdoc.value = item.id_pais_doc_participante 
+    });
+  }
+  
+}
+
+// set valor do numero do documento conforme participante escolhido na combo
+function setValueInputTxtNumDocPesquisaReg(){
+  
+  let elemento = document.getElementById("inputTxtNumDocPesquisaReg")
+  elemento.value = "";
+  // recupera campo chave da combo participante 
+  let sel = document.getElementById("inputCmbParticipantePesquisaReg")
+  if(sel.selectedIndex >= 0){
+    if (!ElementValueTextIsNull(sel.options[sel.selectedIndex].value)){
+      // recupera chave 
+      let id_value = parseInt(sel.options[sel.selectedIndex].value);
+      // recupera documento na lista
+      let arrayfiltrado = listaparticipantes.filter(item => item.id_participante === id_value )
+      arrayfiltrado.forEach( item => elemento.value = formatarCampoDocumentoStr(item.num_doc_participante));
+    }
+  }else{
+    elemento.value = "";
   }
 }
 
@@ -848,9 +1094,9 @@ function validaDatasFormulario(){
 const postPopulaDataTablePesquisa = async ( ) => {
    
   // Ativa gif loading
-   showLoading();
+  showLoading();
   
-   if(validaDatasFormulario()){
+  if(validaDatasFormulario()){
     try{
         //define form data de chamada api
         let formData = new FormData();
@@ -921,10 +1167,138 @@ const postPopulaDataTablePesquisa = async ( ) => {
     }
     // Desativa gif loading
     hideLoading();
-  
-
   }
 }
+
+/* Métodos de atualização no banco de dados via chamada api */
+const execApiPesquisa = async (     data_pesquisa,                  id_status_lista_pesquisa,  
+                                    id_pais_documento_participante, documento_participante,     
+                                    num_documento_participante,     observacao_pesquisa, 
+                                    operacao_banco ) => {
+
+
+  //define form data de chamada da api
+  let formData = new FormData();
+  
+  data_pesquisa = data_pesquisa + " " + "00:00:00";
+  formData.append("data_pesquisa",                    data_pesquisa);
+  formData.append("id_status_lista_pesquisa",         parseInt(id_status_lista_pesquisa));
+  formData.append("id_pais_documento_participante",   parseInt(id_pais_documento_participante));
+  formData.append("documento_participante",           documento_participante);
+  formData.append("num_documento_participante",       retiraFormatacaoDocumentoStr(num_documento_participante));
+  formData.append("observacao_pesquisa",              observacao_pesquisa);
+
+   // Efetua chamada da api connforme operação
+   fetch(url_api + "/AdicionarSimulacaoPesquisaListaRestritiva", {
+       
+    method: "post",
+    body: formData
+  })
+  .then((response) => {
+    console.log(response)
+    if (response.status === 200) {
+        alert("Registro adicionado!")
+    }
+    else if (!response.ok) {
+        return response.json().then(errorData => {
+          console.log(errorData)
+          alert(errorData.mesage);
+        });
+    }
+  })
+  .catch((error) => {
+    console.error('Error:', error);
+  });
+}
+
+/* Abrir formulário modal  */
+function openFormPesquisa(){
+  
+  //Show modal
+  modal = new bootstrap.Modal(document.getElementById("formPesquisaReg"), {
+  keyboard: false
+  });
+  modal.show();
+
+  //Popula comboboxe participante
+  postPopulaListaParticipantes();
+
+}
+
+/* Limpa campos do formulario modal simulação pesquisa   */
+function LimpaCamposFormPesquisa(operacao_banco){
+  id_pais_doc_participante_p                                      = 0;
+  document.getElementById("inputTxtDataPesquisaReg").text         = "";
+  document.getElementById("inputcmbIdentPesquisaReg").text        = "";
+  document.getElementById("inputcmbStatusPesquisaReg").text       = "";
+  document.getElementById("inputCmbParticipantePesquisaReg").text = "";
+  document.getElementById("inputCmbDocumentoPesquisaReg").text    = 0;
+  document.getElementById("inputTxtNumDocPesquisaReg").text       = "";
+  document.getElementById("inputCmbParticipantePesquisaReg").text = "";
+  document.getElementById("inputTxtObservacaoPesquisaReg").text   = "";
+}
+
+/* Função de validação da entrade dados do modal formulário */
+function entradaFormPesquisaOk(){
+  
+  let entradaOk = false;
+
+  if (document.getElementById("inputTxtDataPesquisaReg").value.trim() === ""){
+    alert("Data da pesquisa não informada !");
+  }
+  else if (document.getElementById("inputcmbIdentPesquisaReg").value == 0){
+    alert("Identificador da lista restritiva não informado !");
+  }
+  else if (document.getElementById("inputcmbStatusPesquisaReg").value == 0){
+    alert("Status do Identificador da lista restritiva não informado !");
+  }
+  else if (document.getElementById("inputCmbDocumentoPesquisaReg").value == 0){
+    alert("Documento do participante não informado !");
+  }
+  else if (document.getElementById("inputTxtNumDocPesquisaReg").value.trim() === ""){
+    alert("Número do Documento do participante não informado !");  
+  }
+  else{
+    entradaOk = true
+  }
+
+  return entradaOk
+}
+
+/* Open modal formulario para adicionar um nova simulação pesquisa */
+const OpenFormAdicionaPesquisa = () => {
+
+  // set data da pesquisa
+  let dtAtual = new Date();
+  document.getElementById("inputTxtDataPesquisaReg").value = dtAtual.toISOString().slice(0,10);
+
+  //Limpa campos do formulário 
+  LimpaCamposFormPesquisa("");
+
+  // open modal formulario 
+  openFormPesquisa();
+
+}
+/* Adicionar pesquisa*/
+const AdicionarPesquisa = () => {
+ 
+  if (entradaFormPesquisaOk()){
+   
+    // chamada da api para adicionar registro
+    execApiPesquisa( document.getElementById("inputTxtDataPesquisaReg").value,
+                     document.getElementById("inputcmbStatusPesquisaReg").value,
+                     id_pais_doc_participante_pesquisa,
+                     document.getElementById("inputCmbDocumentoPesquisaReg").value,
+                     document.getElementById("inputTxtNumDocPesquisaReg").value,
+                     document.getElementById("inputTxtObservacaoPesquisaReg").value,
+                     operacao_banco_incluir );
+
+    // Limpa entrada de dados
+    LimpaCamposFormPesquisa(operacao_banco_incluir)
+    
+  }
+}
+
 
 //#endregion
 
@@ -955,10 +1329,12 @@ const InicializaPagina = () => {
   postPopulaDataTableParticipante();
   postPopulaDataTablePesquisa();
   getPopulaComboboxClassificacao();
+  getPopulaComboboxIndentificadores();
+  postPopulaListaStatusIdentificadores();
 }
 
-if (paginaAtiva == false){
-    paginaAtiva = true
+if (paginaativa == false){
+    paginaativa = true
     //Event load e realod pagina
     window.addEventListener("load",   () => InicializaPagina());
     window.addEventListener("onload", () => InicializaPagina());
