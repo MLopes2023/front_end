@@ -970,6 +970,12 @@ const RemoverParticipante = () => {
 // variaveis 
 var id_pais_doc_participante_pesquisa = 0;
 
+
+/* Atualiza tabela participante após o formlário modal não estiver ativo na página (Similar OnClose) */
+$("#formPesquisaReg").on("hidden.bs.modal", function () {
+  postPopulaDataTablePesquisa();
+});
+
 /* Recupera tabela pesquisa */
 $(document).ready(function() {
   
@@ -993,12 +999,13 @@ function validaDocumentoPesquisaReg(){
   let msginvalida = validaCpfCnpj(document.getElementById("inputTxtNumDocPesquisaReg").value);
   if (msginvalida != "" ){
     alert(msginvalida);
-    document.getElementById("validaDocumentoPesquisaReg").value = "";
-    document.getElementById("validaDocumentoPesquisaReg").focus();
+    document.getElementById("inputTxtNumDocPesquisaReg").value = "";
+    document.getElementById("inputTxtNumDocPesquisaReg").focus();
   }
   setValueInputCmbParticipantePesquisaReg();
 }
 
+// set valor do nome do participante conforme numero do documento
 function setValueInputCmbParticipantePesquisaReg(){
 
   let elemento_nome   = document.getElementById("inputCmbParticipantePesquisaReg")
@@ -1015,17 +1022,20 @@ function setValueInputCmbParticipantePesquisaReg(){
     let arrayfiltrado = listaparticipantes.filter(item => item.num_doc_participante === id_value)
     arrayfiltrado.forEach( item => {
       elemento_nome.value = item.id_participante 
-      elemento_tpdoc.value = item.id_pais_doc_participante 
+      id_pais_doc_participante_pesquisa = item.id_pais_doc_participante 
+      elemento_tpdoc.value = item.id_doc_participante
     });
   }
-  
 }
 
 // set valor do numero do documento conforme participante escolhido na combo
 function setValueInputTxtNumDocPesquisaReg(){
   
-  let elemento = document.getElementById("inputTxtNumDocPesquisaReg")
-  elemento.value = "";
+  let elemento          = document.getElementById("inputTxtNumDocPesquisaReg")
+  let elemento_tpdoc    = document.getElementById("inputCmbDocumentoPesquisaReg")
+  elemento.value        = "";
+  elemento_tpdoc.value  = "";
+  
   // recupera campo chave da combo participante 
   let sel = document.getElementById("inputCmbParticipantePesquisaReg")
   if(sel.selectedIndex >= 0){
@@ -1034,7 +1044,11 @@ function setValueInputTxtNumDocPesquisaReg(){
       let id_value = parseInt(sel.options[sel.selectedIndex].value);
       // recupera documento na lista
       let arrayfiltrado = listaparticipantes.filter(item => item.id_participante === id_value )
-      arrayfiltrado.forEach( item => elemento.value = formatarCampoDocumentoStr(item.num_doc_participante));
+      arrayfiltrado.forEach( item => { 
+        elemento.value = formatarCampoDocumentoStr(item.num_doc_participante)
+        id_pais_doc_participante_pesquisa = item.id_pais_doc_participante 
+        elemento_tpdoc.value = item.id_doc_participante
+      });
     }
   }else{
     elemento.value = "";
@@ -1227,15 +1241,22 @@ function openFormPesquisa(){
 
 /* Limpa campos do formulario modal simulação pesquisa   */
 function LimpaCamposFormPesquisa(operacao_banco){
-  id_pais_doc_participante_p                                      = 0;
-  document.getElementById("inputTxtDataPesquisaReg").text         = "";
-  document.getElementById("inputcmbIdentPesquisaReg").text        = "";
-  document.getElementById("inputcmbStatusPesquisaReg").text       = "";
-  document.getElementById("inputCmbParticipantePesquisaReg").text = "";
-  document.getElementById("inputCmbDocumentoPesquisaReg").text    = 0;
+
+  if (operacao_banco == "")
+  {
+    document.getElementById("inputTxtDataPesquisaReg").value         = "";
+    document.getElementById("inputcmbIdentPesquisaReg").value        = 0;
+    document.getElementById("inputcmbStatusPesquisaReg").value       = 0;
+  }
+
+  id_pais_doc_participante_pesquisa                                = 0;
+  document.getElementById("inputCmbParticipantePesquisaReg").value = 0;
+  document.getElementById("inputCmbDocumentoPesquisaReg").value    = 0;
+  document.getElementById("inputCmbDocumentoPesquisaReg").text    = "0";
+  document.getElementById("inputTxtNumDocPesquisaReg").value       = "";
   document.getElementById("inputTxtNumDocPesquisaReg").text       = "";
-  document.getElementById("inputCmbParticipantePesquisaReg").text = "";
-  document.getElementById("inputTxtObservacaoPesquisaReg").text   = "";
+  document.getElementById("inputCmbParticipantePesquisaReg").value = 0;
+  document.getElementById("inputTxtObservacaoPesquisaReg").text    = "";
 }
 
 /* Função de validação da entrade dados do modal formulário */
@@ -1268,13 +1289,13 @@ function entradaFormPesquisaOk(){
 /* Open modal formulario para adicionar um nova simulação pesquisa */
 const OpenFormAdicionaPesquisa = () => {
 
-  // set data da pesquisa
-  let dtAtual = new Date();
-  document.getElementById("inputTxtDataPesquisaReg").value = dtAtual.toISOString().slice(0,10);
-
   //Limpa campos do formulário 
   LimpaCamposFormPesquisa("");
 
+  // set data da pesquisa
+  let dtAtual = new Date();
+  document.getElementById("inputTxtDataPesquisaReg").value = dtAtual.toISOString().slice(0,10);
+  
   // open modal formulario 
   openFormPesquisa();
 
@@ -1284,11 +1305,22 @@ const AdicionarPesquisa = () => {
  
   if (entradaFormPesquisaOk()){
    
+    // recupera descrição do documento
+    let documentotext = "";
+    let sel = document.getElementById("inputCmbDocumentoPesquisaReg")
+    if(sel.selectedIndex >= 0){
+      if (!ElementValueTextIsNull(sel.options[sel.selectedIndex].text)){
+        documentotext = sel.options[sel.selectedIndex].text;
+      }
+    }else{
+      documentotext = "";
+    }
+
     // chamada da api para adicionar registro
     execApiPesquisa( document.getElementById("inputTxtDataPesquisaReg").value,
                      document.getElementById("inputcmbStatusPesquisaReg").value,
                      id_pais_doc_participante_pesquisa,
-                     document.getElementById("inputCmbDocumentoPesquisaReg").value,
+                     documentotext,
                      document.getElementById("inputTxtNumDocPesquisaReg").value,
                      document.getElementById("inputTxtObservacaoPesquisaReg").value,
                      operacao_banco_incluir );
